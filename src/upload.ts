@@ -7,6 +7,8 @@ import type { Request, Response } from "express";
 
 type ProcessedFiles = Array<[string, File]>;
 
+dotenv.config();
+
 const requestHandler = async (req: Request, res: Response) => {
 
   const body = {
@@ -64,8 +66,7 @@ const requestHandler = async (req: Request, res: Response) => {
     return;
   }
 
-  dotenv.config();
-  const private_key_raw = JSON.parse(process.env.BUNDLR_PRIVATE_KEY);
+  const private_key_raw = JSON.parse(process.env.BUNDLR_PRIVATE_KEY as string);
   const private_key_array: number[] = Array.from(private_key_raw);
   const private_key = Uint8Array.from(private_key_array);
   const keypair = Keypair.fromSecretKey(private_key);

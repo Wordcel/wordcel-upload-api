@@ -9,4 +9,6 @@ declare global {
   }
 }
 
+declare module 'node-fetch';
+
 export {};

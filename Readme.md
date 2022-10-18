@@ -24,3 +24,7 @@ yarn dev
 ---
 
 Note: this script authenticates all requests using message signature and checks whether the public key is a Wordcel user. To disable the check, comment the code from line 50-67 in https://github.com/Wordcel/wordcel-img-api/blob/master/src/upload.ts#L50
+
+You will need to fund the wallet you provide in the env file with some SOL to fund the uploads using Bundlr.
+
+[Bundlr](https://bundlr.network/) is a service that enables multichain uploads to the Arweave network.

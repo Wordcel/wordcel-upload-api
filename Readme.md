@@ -20,3 +20,7 @@ Run this command to start the server
 ```
 yarn dev
 ```
+
+---
+
+Note: this script authenticates all requests using message signature and checks whether the public key is a Wordcel user. To disable the check, comment the code from line 50-67 in https://github.com/Wordcel/wordcel-img-api/blob/master/src/upload.ts#L50

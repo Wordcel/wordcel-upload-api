@@ -1,13 +1,19 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import formidable, { File } from "formidable";
+
+import formidable, { File as FormidableFile } from "formidable";
 import { Keypair } from "@solana/web3.js";
 import { authenticate, uploadImageNode } from "./server";
 import type { Request, Response } from "express";
 
-type ProcessedFiles = Array<[string, File]>;
+type ProcessedFiles = Array<[string, FormidableFile]>;
 
 dotenv.config();
+
+const private_key_raw = JSON.parse(process.env.BUNDLR_PRIVATE_KEY as string);
+const private_key_array: number[] = Array.from(private_key_raw);
+const private_key = Uint8Array.from(private_key_array);
+const keypair = Keypair.fromSecretKey(private_key);
 
 const requestHandler = async (req: Request, res: Response) => {
 
@@ -65,11 +71,6 @@ const requestHandler = async (req: Request, res: Response) => {
     });
     return;
   }
-
-  const private_key_raw = JSON.parse(process.env.BUNDLR_PRIVATE_KEY as string);
-  const private_key_array: number[] = Array.from(private_key_raw);
-  const private_key = Uint8Array.from(private_key_array);
-  const keypair = Keypair.fromSecretKey(private_key);
 
   const image = files?.[0][1];
   if (!image) return;

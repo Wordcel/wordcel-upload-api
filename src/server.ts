@@ -100,7 +100,76 @@ export const uploadImageNode = async (
   }
   const arrayBuffer = fs.readFileSync(image.filepath, null);
   const file = new Uint8Array(arrayBuffer);
+
   const transaction = bundlr.createTransaction(file, { tags });
+  await transaction.sign();
+  await transaction.upload();
+  const id = transaction.id;
+
+  if (!id) {
+    return { url: null, error: "Error while trying to upload image to arweave" };
+  }
+
+  const url = 'https://arweave.net/' + id;
+  return { url: url, error: null };
+}
+
+export const uploadImageBlob = async (
+  image: Blob,
+  keypair: Keypair
+) => {
+  if (!image.type) return { url: null, error: "File type not present" };
+
+  const allowedExtensions = ['png', 'jpg', 'jpeg', 'gif'];
+  const extension = image.type.split('/').pop();
+
+  if (!extension) {
+    return { url: null, error: "Invalid file extension" }
+  }
+
+  if (!allowedExtensions.includes(extension)) {
+    return { url: null, error: "File type not allowed" }
+  }
+
+  const type = extension === 'jpg' ? 'jpeg' : extension;
+  const tags = [{ name: "Content-Type", value: `image/${type}` }];
+
+  const bundlr = new Bundlr(
+    BUNDLR_MAINNET_ENDPOINT,
+    'solana',
+    keypair.secretKey,
+    {
+      timeout: 60000,
+      providerUrl: MAINNET_ENDPOINT,
+    },
+  );
+
+  const size = image.size;
+  const price = await bundlr.getPrice(size);
+  const minimumFunds = price.multipliedBy(3);
+
+  let skipFund = false;
+
+  if (keypair.publicKey) {
+    const currentBalance = await getBundlrBalance(keypair.publicKey.toBase58());
+    if (!currentBalance.lt(minimumFunds)) skipFund = true;
+  }
+
+  if (!skipFund) {
+    const toFundAmount = price.multipliedBy(50);
+    console.log(`Funding: ${toFundAmount}`);
+    try {
+      await bundlr.fund(toFundAmount);
+    }
+    catch (e) {
+      console.log(e);
+      return { url: null, error: "Insufficient balance to upload" };
+    }
+  }
+
+  const file = await image.arrayBuffer();
+  const transaction = bundlr.createTransaction(new Uint8Array(file), { tags });
+
   await transaction.sign();
   await transaction.upload();
   const id = transaction.id;

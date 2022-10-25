@@ -1,6 +1,7 @@
 import fs from 'fs';
 import axios from 'axios';
-import * as nacl from 'tweetnacl'
+import dotenv from 'dotenv';
+import * as nacl from 'tweetnacl';
 import {
   PublicKey,
   Keypair,
@@ -15,6 +16,7 @@ export const CLUSTER = 'mainnet-beta';
 export const MESSAGE_TO_SIGN = 'WORDCEL';
 export const MAINNET_ENDPOINT = clusterApiUrl(CLUSTER);
 export const BUNDLR_MAINNET_ENDPOINT = 'https://node1.bundlr.network';
+export const API_URL = 'https://wordcelclub.com/api';
 
 export const authenticate = (
   public_key: string,
@@ -180,4 +182,63 @@ export const uploadImageBlob = async (
 
   const url = 'https://arweave.net/' + id;
   return { url: url, error: null };
+}
+
+export const uploadJSON = async (
+  data: string,
+  tags: [{ name: string, value: string }],
+  keypair: Keypair
+) => {
+  const bundlr = new Bundlr(
+    BUNDLR_MAINNET_ENDPOINT,
+    'solana',
+    keypair.secretKey,
+    {
+      timeout: 60000,
+      providerUrl: MAINNET_ENDPOINT,
+    },
+  );
+
+  const price = await bundlr.getPrice(data.length);
+  const minimumFunds = price.multipliedBy(50);
+
+  let skipFund = false;
+
+  if (keypair.publicKey) {
+    const currentBalance = await getBundlrBalance(keypair.publicKey.toBase58());
+    if (!currentBalance.lt(minimumFunds)) skipFund = true;
+  }
+
+  if (!skipFund) {
+    const toFundAmount = price.multipliedBy(100);
+    console.log(`Funding: ${toFundAmount}`);
+    try {
+      await bundlr.fund(toFundAmount);
+    }
+    catch (e) {
+      console.log(e);
+      return { url: null, error: "Insufficient balance to upload" };
+    }
+  }
+
+  const transaction = bundlr.createTransaction(data, { tags });
+  await transaction.sign();
+  await transaction.upload();
+  const id = transaction.id;
+
+  if (!id) {
+    return { url: null, error: "Error while trying to upload data to arweave" };
+  }
+
+  const url = 'https://arweave.net/' + id;
+  return { url: url, error: null };
+}
+
+export function getKeypair() {
+  dotenv.config();
+  const private_key_raw = JSON.parse(process.env.BUNDLR_PRIVATE_KEY as string);
+  const private_key_array: number[] = Array.from(private_key_raw);
+  const private_key = Uint8Array.from(private_key_array);
+  const keypair = Keypair.fromSecretKey(private_key);
+  return keypair;
 }

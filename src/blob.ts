@@ -2,7 +2,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch-commonjs';
 import { Keypair } from "@solana/web3.js";
-import { authenticate, uploadImageBlob } from "./server";
+import { API_URL, authenticate, uploadImageBlob } from "./server";
 import type { Request, Response } from "express";
 
 dotenv.config();
@@ -31,7 +31,7 @@ export const imageURLRequestHandler = async (req: Request, res: Response) => {
   if (!authenticated) return;
 
   // Check if user exists
-  const user_request = await axios.get('https://wordcelclub.com/api/user/get/' + public_key);
+  const user_request = await axios.get(API_URL + '/user/get/' + public_key);
   const user_exists = user_request.status === 200;
 
   if (!user_exists) {

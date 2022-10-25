@@ -1,19 +1,9 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
-
+import { API_URL, authenticate, getKeypair, uploadImageNode } from "./server";
 import formidable, { File as FormidableFile } from "formidable";
-import { Keypair } from "@solana/web3.js";
-import { authenticate, uploadImageNode } from "./server";
 import type { Request, Response } from "express";
 
 type ProcessedFiles = Array<[string, FormidableFile]>;
-
-dotenv.config();
-
-const private_key_raw = JSON.parse(process.env.BUNDLR_PRIVATE_KEY as string);
-const private_key_array: number[] = Array.from(private_key_raw);
-const private_key = Uint8Array.from(private_key_array);
-const keypair = Keypair.fromSecretKey(private_key);
 
 const requestHandler = async (req: Request, res: Response) => {
 
@@ -62,7 +52,7 @@ const requestHandler = async (req: Request, res: Response) => {
   if (!authenticated) return;
 
   // Check if user exists
-  const user_request = await axios.get('https://wordcelclub.com/api/user/get/' + body.public_key);
+  const user_request = await axios.get(API_URL + '/user/get/' + body.public_key);
   const user_exists = user_request.status === 200;
 
   if (!user_exists) {
@@ -81,6 +71,7 @@ const requestHandler = async (req: Request, res: Response) => {
     return;
   }
 
+  const keypair = getKeypair();
   const response = await uploadImageNode(image, keypair);
   if (response.error) {
     res.status(500).json(response)

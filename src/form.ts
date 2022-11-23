@@ -52,15 +52,15 @@ const requestHandler = async (req: Request, res: Response) => {
   if (!authenticated) return;
 
   // Check if user exists
-  const user_request = await axios.get(API_URL + '/user/get/' + body.public_key);
-  const user_exists = user_request.status === 200;
+  // const user_request = await axios.get(API_URL + '/user/get/' + body.public_key);
+  // const user_exists = user_request.status === 200;
 
-  if (!user_exists) {
-    res.status(400).json({
-      error: "User does not exist",
-    });
-    return;
-  }
+//   if (!user_exists) {
+//     res.status(400).json({
+//       error: "User does not exist",
+//     });
+//     return;
+//   }
 
   const image = files?.[0][1];
   if (!image) return;

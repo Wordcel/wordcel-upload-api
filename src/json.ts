@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Request, Response } from 'express';
-import { API_URL, authenticate, cacheArweaveImage, getKeypair, uploadJSON } from './server'
+import { API_URL, authenticate, getKeypair, uploadJSON } from './server'
 
 async function uploadJSONHandler(req: Request, res: Response) {
   const { public_key, signature, data, tags } = req.body;
@@ -42,10 +42,6 @@ async function uploadJSONHandler(req: Request, res: Response) {
   );
 
   if (response.url) {
-    const cache_to_cdn_response = await cacheArweaveImage(response.url);
-    if (cache_to_cdn_response.error) {
-      res.status(500).json(cache_to_cdn_response);
-    }
     return res.status(200).json(response);
   } else {
     return res.status(500).json(response);

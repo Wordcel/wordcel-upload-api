@@ -250,10 +250,10 @@ export const cacheArweaveImage = async (url: string) => {
   try {
     const res = await axios.get(cdnUrlWithParams, { responseType: 'json' });
     if (res.data.message === 'success') {
-      return { url: CDN_URL + url.split('/').pop(), error: null };
+      return true;
     }
-    return{ url: null, error: "Error while trying to cache image" };
+    return false;
   } catch (e) {
-    return { url: null, error: "Error while trying to cache image" };
+    return false;
   }
 }

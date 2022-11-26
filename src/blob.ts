@@ -48,7 +48,7 @@ export const imageURLRequestHandler = async (req: Request, res: Response) => {
 
   if (upload_res.url) {
     const cache_to_cdn_response = await cacheArweaveImage(upload_res.url);
-    if (cache_to_cdn_response.error) {
+    if (!cache_to_cdn_response) {
       res.status(500).json(cache_to_cdn_response);
     }
     res.status(200).json(upload_res);

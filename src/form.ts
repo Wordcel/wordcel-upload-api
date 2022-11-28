@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL, authenticate, getKeypair, uploadImageNode } from "./server";
+import { API_URL, authenticate, cacheArweaveImage, getKeypair, uploadImageNode } from "./server";
 import formidable, { File as FormidableFile } from "formidable";
 import type { Request, Response } from "express";
 
@@ -76,7 +76,13 @@ const requestHandler = async (req: Request, res: Response) => {
   if (response.error) {
     res.status(500).json(response)
   } else {
-    res.status(200).json(response);
+    if (response.url) {
+      const cache_to_cdn_response = await cacheArweaveImage(response.url);
+      if (!cache_to_cdn_response) {
+        res.status(500).json(cache_to_cdn_response);
+      }
+      res.status(200).json(response);
+    }
   }
 
 };

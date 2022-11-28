@@ -17,8 +17,6 @@ export const MESSAGE_TO_SIGN = 'WORDCEL';
 export const MAINNET_ENDPOINT = clusterApiUrl(CLUSTER);
 export const BUNDLR_MAINNET_ENDPOINT = 'https://node1.bundlr.network';
 export const API_URL = 'https://wordcelclub.com/api';
-export const CACHE_IMAGE_URL = 'https://9bosz4fi61.execute-api.us-east-1.amazonaws.com/og-image-generator-arweave-cdn-lambda';
-export const CDN_URL = 'https://og.wdclclub.com/arweave/';
 
 export const authenticate = (
   public_key: string,
@@ -243,17 +241,4 @@ export function getKeypair() {
   const private_key = Uint8Array.from(private_key_array);
   const keypair = Keypair.fromSecretKey(private_key);
   return keypair;
-}
-
-export const cacheArweaveImage = async (url: string) => {
-  const cdnUrlWithParams = `${CACHE_IMAGE_URL}?arweaveUrl=${encodeURIComponent(url)}`;
-  try {
-    const res = await axios.get(cdnUrlWithParams, { responseType: 'json' });
-    if (res.data.message === 'success') {
-      return true;
-    }
-    return false;
-  } catch (e) {
-    return false;
-  }
 }

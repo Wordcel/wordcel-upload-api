@@ -2,7 +2,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch-commonjs';
 import { Keypair } from "@solana/web3.js";
-import { API_URL, authenticate, cacheArweaveImage, uploadImageBlob } from "./server";
+import { API_URL, authenticate, uploadImageBlob } from "./server";
 import type { Request, Response } from "express";
 
 dotenv.config();
@@ -47,10 +47,6 @@ export const imageURLRequestHandler = async (req: Request, res: Response) => {
   const upload_res = await uploadImageBlob(blob, keypair);
 
   if (upload_res.url) {
-    const cache_to_cdn_response = await cacheArweaveImage(upload_res.url);
-    if (!cache_to_cdn_response) {
-      res.status(500).json(cache_to_cdn_response);
-    }
     res.status(200).json(upload_res);
   } else {
     res.status(400).json(upload_res);

@@ -76,13 +76,11 @@ const requestHandler = async (req: Request, res: Response) => {
   if (response.error) {
     res.status(500).json(response)
   } else {
-    if (response.url) {
-      const cache_to_cdn_response = await cacheArweaveImage(response.url);
-      if (!cache_to_cdn_response) {
-        res.status(500).json(cache_to_cdn_response);
-      }
-      res.status(200).json(response);
+    const cache_to_cdn_response = await cacheArweaveImage(response.url!);
+    if (!cache_to_cdn_response) {
+      return res.status(500).json(cache_to_cdn_response);
     }
+    res.status(200).json(response);
   }
 
 };
